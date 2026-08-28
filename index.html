@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>내 차 어디 뒀더라</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#23261F">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#E8E9E2;
+    --surface:#FBFBF7;
+    --slab:#23261F;
+    --slab-ink:#F0E7C6;
+    --ink:#191B17;
+    --muted:#6B7064;
+    --line:#D3D5C9;
+    --line-soft:#E1E2D9;
+    --accent:#C8930A;
+    --accent-bright:#E3B008;
+    --accent-soft:#F6EDCF;
+    --danger:#9A3B2A;
+    --exit:#1E7A52;
+    --shadow:0 1px 2px rgba(25,27,23,.06), 0 8px 24px rgba(25,27,23,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#131511;
+      --surface:#1C1F19;
+      --slab:#0C0E0A;
+      --slab-ink:#F2D98A;
+      --ink:#EDEFE5;
+      --muted:#969C8C;
+      --line:#2C3027;
+      --line-soft:#242820;
+      --accent:#E3B008;
+      --accent-bright:#F2C22D;
+      --accent-soft:#2A2612;
+      --danger:#D9705C;
+      --exit:#3EA97A;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#131511;
+    --surface:#1C1F19;
+    --slab:#0C0E0A;
+    --slab-ink:#F2D98A;
+    --ink:#EDEFE5;
+    --muted:#969C8C;
+    --line:#2C3027;
+    --line-soft:#242820;
+    --accent:#E3B008;
+    --accent-bright:#F2C22D;
+    --accent-soft:#2A2612;
+    --danger:#D9705C;
+    --exit:#3EA97A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:470px;margin:0 auto;padding:22px 18px 56px;display:flex;flex-direction:column;gap:18px}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  header.top h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+  header.top .today{font-size:11px}
+
+  /* ---- signage slab ---- */
+  .slab{
+    background:var(--slab);
+    border-radius:6px;
+    padding:16px 16px 18px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(240,231,198,.10);
+    position:relative;
+    overflow:hidden;
+  }
+  .slab::before{
+    content:"";position:absolute;left:0;right:0;top:0;height:4px;
+    background:repeating-linear-gradient(90deg,var(--accent-bright) 0 18px,transparent 18px 34px);
+    opacity:.85;
+  }
+  .slab-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 14px}
+  .slab-head .eyebrow{color:rgba(240,231,198,.62)}
+  .slab-ago{font-family:"IBM Plex Mono",monospace;font-size:11px;color:rgba(240,231,198,.62);white-space:nowrap}
+
+  .slab-body{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:center}
+  .cell{text-align:center}
+  .cell .lbl{
+    display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;color:rgba(240,231,198,.5);margin-bottom:2px;
+  }
+  .cell .val{
+    display:block;font-family:"Archivo","IBM Plex Sans KR",sans-serif;font-weight:700;
+    font-size:clamp(38px,13vw,60px);line-height:1.02;color:var(--slab-ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;overflow-wrap:anywhere;
+  }
+  .cell .val.empty{color:rgba(240,231,198,.22)}
+  .legacy-spot{
+    margin-top:4px;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    color:rgba(240,231,198,.55);
+  }
+
+  /* mini plan inside the slab */
+  .mini{
+    display:grid;grid-template-columns:1fr .8fr 1fr;grid-template-rows:20px 38px 13px;gap:4px;
+    padding:5px;border:1px solid rgba(240,231,198,.18);border-radius:4px;
+  }
+  .mini div{border-radius:2px;background:rgba(240,231,198,.10)}
+  .mini .m-lane{background:none;border:1px dashed rgba(240,231,198,.16)}
+  .mini .m-bottom{grid-area:1/1/2/4}
+  .mini .m-left{grid-area:2/1}
+  .mini .m-right{grid-area:2/3}
+  .mini .m-entry{
+    grid-area:3/3;background:none;
+    display:flex;align-items:center;justify-content:flex-end;
+  }
+  .mini .m-entry i{
+    width:13px;height:13px;border-radius:2px;background:var(--exit);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mini .m-entry svg{width:9px;height:9px;display:block}
+  .mini .on{background:var(--accent-bright)}
+  .mini-cap{display:block;margin-top:7px;text-align:center;font-size:12px;color:rgba(240,231,198,.8)}
+  .mini-cap.none{color:rgba(240,231,198,.35)}
+
+  .slab-when{margin-top:14px;padding-top:12px;border-top:1px solid rgba(240,231,198,.14);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;color:rgba(240,231,198,.5)}
+
+  /* ---- panel ---- */
+  .panel{
+    background:var(--surface);border:1px solid var(--line);border-radius:6px;
+    padding:16px;display:flex;flex-direction:column;gap:14px;
+  }
+  .field{display:flex;flex-direction:column;gap:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    font-family:"Archivo","IBM Plex Sans KR",sans-serif;font-weight:600;font-size:15px;
+    padding:7px 13px;border-radius:4px;border:1px solid var(--line);
+    background:transparent;color:var(--ink);cursor:pointer;
+    font-variant-numeric:tabular-nums;
+    transition:background .12s ease,border-color .12s ease,color .12s ease;
+  }
+  .chip:hover{border-color:var(--accent)}
+  .chip[aria-pressed="true"]{background:var(--accent-bright);border-color:var(--accent-bright);color:#1A1705}
+
+  /* ---- floor plan picker ---- */
+  .plan{
+    display:grid;grid-template-columns:1fr .8fr 1fr;grid-template-rows:56px 84px 22px;gap:8px;
+    padding:8px;border:1px solid var(--line);border-radius:6px;background:transparent;
+  }
+  .lane{
+    grid-area:2/2;border:1px dashed var(--line);border-radius:3px;
+    background:repeating-linear-gradient(45deg,var(--line-soft) 0 4px,transparent 4px 9px);
+    opacity:.7;
+  }
+  .zone{
+    font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;
+    border:1px solid var(--line);border-radius:3px;background:transparent;
+    display:flex;align-items:center;justify-content:center;padding:0;
+    position:relative;overflow:hidden;
+    transition:background .12s ease,border-color .12s ease,color .12s ease;
+  }
+  .zone::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(90deg,var(--line-soft) 0 1px,transparent 1px 15px);
+    opacity:.8;
+  }
+  .zone span{position:relative}
+  .zone:hover{border-color:var(--accent)}
+  .zone[aria-pressed="true"]{background:var(--accent-bright);border-color:var(--accent-bright);color:#1A1705;font-weight:600}
+  .zone[aria-pressed="true"]::before{opacity:.22}
+  .z-bottom{grid-area:1/1/2/4}
+  .z-left{grid-area:2/1}
+  .z-right{grid-area:2/3}
+  .z-left::before,.z-right::before{background:repeating-linear-gradient(0deg,var(--line-soft) 0 1px,transparent 1px 15px)}
+  .entry{
+    grid-area:3/3;display:flex;align-items:center;justify-content:flex-end;gap:6px;
+  }
+  .entry .ico{
+    width:22px;height:22px;border-radius:3px;background:var(--exit);flex:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .entry .ico svg{width:15px;height:15px;display:block}
+  .entry span{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;font-weight:500;
+    letter-spacing:.18em;color:var(--exit);
+  }
+
+  input[type="text"]{
+    font-family:inherit;font-size:15px;color:var(--ink);background:transparent;
+    border:1px solid var(--line);border-radius:4px;padding:9px 11px;width:100%;
+  }
+  input[type="text"]:focus-visible,.chip:focus-visible,button:focus-visible,summary:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;
+  }
+
+  .save{
+    font-family:inherit;font-size:15px;font-weight:600;color:#1A1705;
+    background:var(--accent-bright);border:1px solid var(--accent-bright);
+    border-radius:4px;padding:13px 16px;cursor:pointer;width:100%;
+    transition:filter .12s ease;
+  }
+  .save:hover{filter:brightness(1.06)}
+  .save[disabled]{opacity:.55;cursor:default}
+  .status{min-height:16px;font-size:11px;color:var(--muted)}
+  .status.err{color:var(--danger)}
+
+  /* ---- history ---- */
+  section.history h2{
+    margin:0 0 8px;font-size:11px;font-family:"IBM Plex Mono",monospace;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:400;
+  }
+  ul.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  ul.log li{display:flex;align-items:baseline;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line-soft)}
+  ul.log li:last-child{border-bottom:none}
+  .log-when{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);
+    flex:none;width:74px;font-variant-numeric:tabular-nums;
+  }
+  .log-spot{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;flex:1}
+  .del{
+    flex:none;background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:15px;line-height:1;padding:2px 4px;border-radius:3px;
+  }
+  .del:hover{color:var(--danger)}
+  .empty-log{color:var(--muted);font-size:13px;margin:2px 0 0}
+
+  details.opts{border-top:1px solid var(--line-soft);padding-top:12px}
+  details.opts summary{
+    cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  }
+  details.opts .body{display:flex;flex-direction:column;gap:10px;padding-top:12px}
+  details.opts label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)}
+  .hint{font-size:11px;color:var(--muted);margin:0}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>내 차 어디 뒀더라</h1>
+    <span class="eyebrow today" id="today"></span>
+  </header>
+
+  <div class="slab">
+    <div class="slab-head">
+      <span class="eyebrow">현재 주차 위치</span>
+      <span class="slab-ago" id="ago"></span>
+    </div>
+    <div class="slab-body">
+      <div>
+        <div class="mini" id="mini" aria-hidden="true">
+          <div class="m-bottom"></div>
+          <div class="m-left"></div>
+          <div class="m-lane"></div>
+          <div class="m-right"></div>
+          <div class="m-entry"><i><svg viewBox="0 0 20 20" fill="none"><path d="M11 3H16V17H11" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10H10.5M8 7.4L10.6 10L8 12.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i></div>
+        </div>
+        <span class="mini-cap none" id="v-area">구역 없음</span>
+      </div>
+      <div class="cell">
+        <span class="lbl">층</span>
+        <span class="val empty" id="v-floor">—</span>
+        <span class="legacy-spot" id="v-spot" hidden></span>
+      </div>
+    </div>
+    <div class="slab-when" id="v-when"></div>
+  </div>
+
+  <div class="panel">
+    <div class="field">
+      <span class="eyebrow">층</span>
+      <div class="chips" id="floor-chips"></div>
+    </div>
+    <div class="field">
+      <span class="eyebrow">구역 — 도면에서 누르기</span>
+      <div class="plan">
+        <button type="button" class="zone z-bottom" data-area="bottom" aria-pressed="false"><span>아래쪽</span></button>
+        <button type="button" class="zone z-left" data-area="left" aria-pressed="false"><span>왼쪽</span></button>
+        <div class="lane" aria-hidden="true"></div>
+        <button type="button" class="zone z-right" data-area="right" aria-pressed="false"><span>오른쪽</span></button>
+        <div class="entry"><span>현관</span><span class="ico"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 3H16V17H11" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 10H10.5M8 7.2L10.8 10L8 12.8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+      </div>
+    </div>
+    <button class="save" id="save">여기에 주차함</button>
+    <div class="status" id="status"></div>
+
+    <details class="opts">
+      <summary>층 목록 편집</summary>
+      <div class="body">
+        <label>층 <input type="text" id="opt-floors" autocomplete="off"></label>
+        <p class="hint">쉼표로 구분해서 적으면 버튼이 바뀝니다. 안 쓰는 층은 지우세요.</p>
+      </div>
+    </details>
+  </div>
+
+  <section class="history">
+    <h2>지난 기록</h2>
+    <ul class="log" id="log"></ul>
+    <p class="empty-log" id="empty-log" hidden>아직 기록이 없습니다.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LS_KEY = "parking-log-v1";
+  var AREA_LABEL = { left: "왼쪽", right: "오른쪽", bottom: "아래쪽" };
+  var DEFAULTS = { records: [], floors: ["B1", "B2", "B3", "B4", "B5"] };
+
+  var state = load();
+  var draft = { floor: null, area: null };
+
+  function load() {
+    try {
+      var raw = window.localStorage.getItem(LS_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        return {
+          records: Array.isArray(p.records) ? p.records : [],
+          floors: Array.isArray(p.floors) && p.floors.length ? p.floors : DEFAULTS.floors.slice()
+        };
+      }
+    } catch (e) {}
+    return { records: [], floors: DEFAULTS.floors.slice() };
+  }
+
+  function save_() {
+    try {
+      window.localStorage.setItem(LS_KEY, JSON.stringify(state));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  var DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+  function areaOf(r) {
+    if (!r) return "";
+    if (r.area && AREA_LABEL[r.area]) return AREA_LABEL[r.area];
+    return r.zone || "";
+  }
+  function fmtWhen(ts) {
+    var d = new Date(ts);
+    return d.getMonth() + 1 + "월 " + d.getDate() + "일(" + DAYS[d.getDay()] + ") " +
+      String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function fmtShort(ts) {
+    var d = new Date(ts);
+    return String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0") +
+      " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function fmtAgo(ts) {
+    var m = Math.floor((Date.now() - ts) / 60000);
+    if (m < 1) return "방금";
+    if (m < 60) return m + "분 전";
+    var h = Math.floor(m / 60);
+    if (h < 24) return h + "시간 전";
+    return Math.floor(h / 24) + "일 전";
+  }
+
+  function el(id) { return document.getElementById(id); }
+
+  function renderToday() {
+    var d = new Date();
+    el("today").textContent = d.getMonth() + 1 + "월 " + d.getDate() + "일 " + DAYS[d.getDay()] + "요일";
+  }
+
+  function renderCurrent() {
+    var r = state.records[0];
+
+    var floorNode = el("v-floor");
+    floorNode.textContent = r && r.floor ? r.floor : "—";
+    floorNode.classList.toggle("empty", !(r && r.floor));
+
+    var spotNode = el("v-spot");
+    spotNode.hidden = !(r && r.spot);
+    if (r && r.spot) spotNode.textContent = r.spot + "번 자리";
+
+    var mini = el("mini");
+    ["m-left", "m-right", "m-bottom"].forEach(function (cls) {
+      mini.querySelector("." + cls).classList.remove("on");
+    });
+    if (r && r.area && AREA_LABEL[r.area]) mini.querySelector(".m-" + r.area).classList.add("on");
+
+    var label = areaOf(r);
+    var cap = el("v-area");
+    cap.textContent = label ? label + " 구역" : "구역 없음";
+    cap.classList.toggle("none", !label);
+
+    el("v-when").textContent = r ? fmtWhen(r.ts) + " 주차" : "아래에서 첫 기록을 남겨보세요";
+    el("ago").textContent = r ? fmtAgo(r.ts) : "";
+  }
+
+  function renderFloors() {
+    var host = el("floor-chips");
+    host.textContent = "";
+    state.floors.forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = v;
+      b.setAttribute("aria-pressed", draft.floor === v ? "true" : "false");
+      b.addEventListener("click", function () {
+        draft.floor = draft.floor === v ? null : v;
+        renderFloors();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function renderPlan() {
+    Array.prototype.forEach.call(document.querySelectorAll(".zone"), function (b) {
+      b.setAttribute("aria-pressed", draft.area === b.dataset.area ? "true" : "false");
+    });
+  }
+
+  function renderLog() {
+    var list = el("log");
+    list.textContent = "";
+    var rows = state.records.slice(0, 12);
+    el("empty-log").hidden = rows.length > 0;
+    rows.forEach(function (r) {
+      var li = document.createElement("li");
+
+      var when = document.createElement("span");
+      when.className = "log-when";
+      when.textContent = fmtShort(r.ts);
+
+      var spot = document.createElement("span");
+      spot.className = "log-spot";
+      spot.textContent = [r.floor, areaOf(r), r.spot].filter(Boolean).join(" · ") || "—";
+
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "del";
+      del.setAttribute("aria-label", fmtShort(r.ts) + " 기록 삭제");
+      del.textContent = "×";
+      del.addEventListener("click", function () {
+        state.records = state.records.filter(function (x) { return x.id !== r.id; });
+        renderAll();
+        commit("기록을 지웠습니다.");
+      });
+
+      li.appendChild(when);
+      li.appendChild(spot);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+
+  function renderAll() {
+    renderCurrent();
+    renderFloors();
+    renderPlan();
+    renderLog();
+    el("opt-floors").value = state.floors.join(", ");
+  }
+
+  function setStatus(msg, isErr) {
+    var s = el("status");
+    s.textContent = msg || "";
+    s.classList.toggle("err", !!isErr);
+  }
+
+  function commit(okMsg) {
+    if (save_()) setStatus(okMsg || "저장했습니다.");
+    else setStatus("저장하지 못했습니다. 브라우저의 사이트 데이터 설정을 확인해 주세요.", true);
+  }
+
+  function record() {
+    if (!draft.floor && !draft.area) {
+      setStatus("층이나 구역 중 하나는 골라주세요.", true);
+      return;
+    }
+    var last = state.records[0];
+    if (last && last.floor === (draft.floor || "") && last.area === (draft.area || "") &&
+        Date.now() - last.ts < 120000) {
+      setStatus("방금 같은 위치로 기록했습니다.");
+      return;
+    }
+    state.records.unshift({
+      id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+      ts: Date.now(),
+      floor: draft.floor || "",
+      area: draft.area || ""
+    });
+    state.records = state.records.slice(0, 60);
+    renderAll();
+    commit("기록했습니다.");
+  }
+
+  function commitFloors() {
+    var f = el("opt-floors").value.split(/[,\s]+/)
+      .map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 14);
+    if (!f.length || f.join("|") === state.floors.join("|")) return;
+    state.floors = f;
+    if (draft.floor && f.indexOf(draft.floor) === -1) draft.floor = null;
+    renderAll();
+    commit("층 목록을 바꿨습니다.");
+  }
+
+  renderToday();
+  renderAll();
+  setInterval(renderCurrent, 30000);
+
+  el("save").addEventListener("click", record);
+  el("opt-floors").addEventListener("change", commitFloors);
+  Array.prototype.forEach.call(document.querySelectorAll(".zone"), function (b) {
+    b.addEventListener("click", function () {
+      draft.area = draft.area === b.dataset.area ? null : b.dataset.area;
+      renderPlan();
+    });
+  });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
