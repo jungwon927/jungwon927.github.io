@@ -562,6 +562,13 @@
   });
 
   if ("serviceWorker" in navigator) {
+    // 새 버전이 설치되면 한 번만 새로고침해 바로 반영합니다.
+    var swReloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (swReloaded) return;
+      swReloaded = true;
+      window.location.reload();
+    });
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js").catch(function () {});
     });
