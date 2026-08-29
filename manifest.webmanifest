@@ -2,7 +2,7 @@
   "name": "코식이",
   "short_name": "코식이",
   "description": "지하주차장 층과 구역을 두 번 눌러 기록하는 주차 위치 메모",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=4",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
