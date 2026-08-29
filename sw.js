@@ -1,12 +1,18 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시에 담아 둡니다.
-var CACHE = "parking-v1";
+var CACHE = "parking-v2";
 var SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png"
+  "./icons/icon-maskable-512.png",
+  "./icons/faces/b1-left.webp",
+  "./icons/faces/b1-mid.webp",
+  "./icons/faces/b1-right.webp",
+  "./icons/faces/b2-left.webp",
+  "./icons/faces/b2-mid.webp",
+  "./icons/faces/b2-right.webp"
 ];
 
 self.addEventListener("install", function (e) {

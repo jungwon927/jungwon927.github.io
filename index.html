@@ -258,6 +258,16 @@
   @media (prefers-reduced-motion: reduce){
     *{transition:none!important;animation:none!important}
   }
+  .zone .face{display:none;width:34px;height:34px;background-repeat:no-repeat;background-position:center;background-size:contain;position:relative}
+  .z-bottom .face{width:28px;height:28px}
+  .plan.faces .zone{flex-direction:column;gap:2px}
+  .plan.faces .zone .face{display:block}
+  .plan[data-floor="B1"] .z-left .face{background-image:url("icons/faces/b1-left.webp")}
+  .plan[data-floor="B1"] .z-right .face{background-image:url("icons/faces/b1-right.webp")}
+  .plan[data-floor="B1"] .z-bottom .face{background-image:url("icons/faces/b1-mid.webp")}
+  .plan[data-floor="B2"] .z-left .face{background-image:url("icons/faces/b2-left.webp")}
+  .plan[data-floor="B2"] .z-right .face{background-image:url("icons/faces/b2-right.webp")}
+  .plan[data-floor="B2"] .z-bottom .face{background-image:url("icons/faces/b2-mid.webp")}
 </style>
 </head>
 <body>
@@ -333,6 +343,7 @@
   var LS_KEY = "parking-log-v1";
   var AREA_LABEL = { left: "왼쪽", right: "오른쪽", bottom: "아래쪽" };
   var DEFAULTS = { records: [], floors: ["B1", "B2", "B3", "B4", "B5"] };
+  var FACE_FLOORS = ["B1", "B2"];   // 그림 아이콘이 있는 층
 
   var state = load();
   var draft = { floor: null, area: null };
@@ -429,6 +440,7 @@
       b.addEventListener("click", function () {
         draft.floor = draft.floor === v ? null : v;
         renderFloors();
+        renderPlan();
       });
       host.appendChild(b);
     });
@@ -437,7 +449,17 @@
   function renderPlan() {
     Array.prototype.forEach.call(document.querySelectorAll(".zone"), function (b) {
       b.setAttribute("aria-pressed", draft.area === b.dataset.area ? "true" : "false");
+      if (!b.querySelector(".face")) {
+        var f = document.createElement("span");
+        f.className = "face";
+        b.insertBefore(f, b.firstChild);
+      }
     });
+    var plan = document.querySelector(".plan");
+    if (plan) {
+      plan.dataset.floor = draft.floor || "";
+      plan.classList.toggle("faces", FACE_FLOORS.indexOf(draft.floor) !== -1);
+    }
   }
 
   function renderLog() {
