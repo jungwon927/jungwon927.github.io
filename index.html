@@ -262,12 +262,13 @@
   .z-bottom .face{width:28px;height:28px}
   .plan.faces .zone{flex-direction:column;gap:2px}
   .plan.faces .zone .face{display:block}
-  .plan[data-floor="B1"] .z-left .face{background-image:url("icons/faces/b1-left.webp")}
-  .plan[data-floor="B1"] .z-right .face{background-image:url("icons/faces/b1-right.webp")}
-  .plan[data-floor="B1"] .z-bottom .face{background-image:url("icons/faces/b1-mid.webp")}
-  .plan[data-floor="B2"] .z-left .face{background-image:url("icons/faces/b2-left.webp")}
-  .plan[data-floor="B2"] .z-right .face{background-image:url("icons/faces/b2-right.webp")}
-  .plan[data-floor="B2"] .z-bottom .face{background-image:url("icons/faces/b2-mid.webp")}
+  .zone .face{background-image:url("icons/faces/sprite.png");background-size:600% 100%}
+  .plan[data-floor="B1"] .z-left .face{background-position:0% 0}
+  .plan[data-floor="B1"] .z-bottom .face{background-position:20% 0}
+  .plan[data-floor="B1"] .z-right .face{background-position:40% 0}
+  .plan[data-floor="B2"] .z-left .face{background-position:60% 0}
+  .plan[data-floor="B2"] .z-bottom .face{background-position:80% 0}
+  .plan[data-floor="B2"] .z-right .face{background-position:100% 0}
 </style>
 </head>
 <body>
