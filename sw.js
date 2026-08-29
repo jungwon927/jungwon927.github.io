@@ -1,6 +1,6 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시에 담아 둡니다.
 // 온라인이면 새 파일을 먼저 받아오고, 느리거나 끊기면 캐시로 넘어갑니다.
-var CACHE = "parking-v4";
+var CACHE = "parking-v5";
 var NET_TIMEOUT = 2500;
 var SHELL = [
   "./",
@@ -9,7 +9,7 @@ var SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
-  "./icons/faces/sprite.png"
+  "./icons/faces/sprite.png?v=2"
 ];
 
 self.addEventListener("install", function (e) {
