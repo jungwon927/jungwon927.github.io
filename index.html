@@ -506,9 +506,20 @@
     s.classList.toggle("err", !!isErr);
   }
 
+  // 안드로이드 앱(위젯)에 현재 위치를 넘겨준다. 브라우저에서는 아무 일도 하지 않는다.
+  function syncNative() {
+    try {
+      if (!window.KosikiNative) return;
+      var r = state.records[0];
+      if (r) KosikiNative.saveSpot(r.floor || "", areaOf(r) || "", String(r.ts));
+      else KosikiNative.clearSpot();
+    } catch (e) {}
+  }
+
   function commit(okMsg) {
     if (save_()) setStatus(okMsg || "저장했습니다.");
     else setStatus("저장하지 못했습니다. 브라우저의 사이트 데이터 설정을 확인해 주세요.", true);
+    syncNative();
   }
 
   function record() {
@@ -545,6 +556,7 @@
 
   renderToday();
   renderAll();
+  syncNative();
   setInterval(renderCurrent, 30000);
 
   el("save").addEventListener("click", record);
